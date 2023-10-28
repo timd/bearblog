@@ -12,7 +12,7 @@ export function connectToBearDb(): Database {
 
     const dbPath = path.join(os.homedir(), BEAR_DB_PATH);
 
-    const db = new sqlite3.Database(dbPath, (err) => {
+    const db = new sqlite3.Database(BEAR_DB_PATH, (err) => {
         if (err) {
             console.log('Error:', err.message);
         } else {
@@ -34,7 +34,7 @@ export function connectToLocalDb(): Database {
         if (err) {
             return console.log('Error:', err.message);
         }
-        console.log('Connected to the bearblog database.');
+        console.log('Connected to the local database.');
     });
 
     return localDb;
