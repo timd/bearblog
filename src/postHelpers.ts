@@ -19,6 +19,7 @@ export function createBlogContent(notes: ZSFNoteRow[]): Array<Post> {
         
         const tags = extractTags(cleanContent)
         const detaggedContent = removeTags(cleanContent)
+        const despacedContent = despaceContent(detaggedContent)
 
         const postContent = `---
 title: "${note.ZTITLE}"
@@ -26,7 +27,7 @@ date: ${createDate()}
 draft: false
 tags: ${tags}
 ---
-${detaggedContent}
+${despacedContent}
         `;
 
         const post: Post = {
@@ -164,3 +165,11 @@ function extractTagsWithHash(input: string): string[] {
     });
     return updatedSource;
   }
+
+function despaceContent(input: string): string {
+    // Split the string by new lines to get an array of paragraphs
+    const paragraphs = input.split('\n');
+
+    // Join the array back into a single string, adding an extra new line between each paragraph
+    return paragraphs.join('\n\n');
+}

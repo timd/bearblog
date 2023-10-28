@@ -94,48 +94,6 @@ export async function saveToLocalDatabase(localDb: Database, rows: ZSFNoteRow[])
     await Promise.all(tasks);
 }
 
-// export function saveToLocalDatabase(localDb: Database, rows: ZSFNoteRow[]) {
-//     rows.forEach((row) => {
-//       // Check if a record with the same Z_PK exists
-//       localDb.get('SELECT * FROM ZSFNOTE WHERE Z_PK = ?', [row.Z_PK], (err, existingRow: ZSFNoteRow) => {
-//         if (err) {
-//           return console.log('Select Error:', err.message);
-//         }
-  
-//         // If a matching record is found
-//         if (existingRow) {
-//           // Compare ZMODIFICATIONDATE
-//           if (new Date(row.ZMODIFICATIONDATE) > new Date(existingRow.ZMODIFICATIONDATE)) {
-//             // Update the record if the new ZMODIFICATIONDATE is greater
-//             const updateQuery = `
-//               UPDATE ZSFNOTE
-//               SET ZTITLE = ?, ZTEXT = ?, ZUNIQUEIDENTIFIER = ?, ZMODIFICATIONDATE = ?, ZARCHIVED = ?, UPDATED = 1
-//               WHERE Z_PK = ?;
-//             `;
-//             localDb.run(updateQuery, [row.ZTITLE, row.ZTEXT, row.ZUNIQUEIDENTIFIER, row.ZMODIFICATIONDATE, row.ZARCHIVED, row.Z_PK], (err) => {
-//               if (err) {
-//                 return console.log('Update Error:', err.message);
-//               }
-//               console.log(`Row updated with ID: ${row.Z_PK}`);
-//             });
-//           }
-//         } else {
-//           // If no matching record is found, insert a new record
-//           const insertQuery = `
-//             INSERT INTO ZSFNOTE (Z_PK, ZTITLE, ZTEXT, ZUNIQUEIDENTIFIER, ZMODIFICATIONDATE, ZARCHIVED)
-//             VALUES (?, ?, ?, ?, ?, ?);
-//           `;
-//           localDb.run(insertQuery, [row.Z_PK, row.ZTITLE, row.ZTEXT, row.ZUNIQUEIDENTIFIER, row.ZMODIFICATIONDATE, row.ZARCHIVED], (err) => {
-//             if (err) {
-//               return console.log('Insert Error:', err.message);
-//             }
-//             console.log(`Row inserted with ID: ${row.Z_PK}`);
-//           });
-//         }
-//       });
-//     });
-// }
-
 const getBloggingTagId = async (bearDb: Database): Promise<number | null> => {
 
     const BEAR_BLOG_TAG = process.env.BEAR_BLOG_TAG || ''
@@ -177,8 +135,12 @@ const fetchTaggedNotes = async (bearDb: Database, z13TagsValues: number[]): Prom
             ZSFNOTE 
         WHERE 
             Z_PK IN (${placeHolders})
-            AND 
-            ZARCHIVED = 0
+                AND 
+            ZARCHIVED != 1
+                AND
+            ZTRASHED != 1
+                AND
+            ZPERMANENTLYDELETED != 1
         `;
 
         bearDb.all(sql, z13TagsValues, (err, rows) => {
@@ -221,8 +183,11 @@ export async function getNoteContent(localDb: Database): Promise<ZSFNoteRow[]> {
 export async function fetchBearData(bearDb: Database) {
     try {
         const bloggingTagId = await getBloggingTagId(bearDb);
+
         const taggedNoteIds = await getTaggedNoteIds(bearDb, bloggingTagId);
+
         const taggedNotes = await fetchTaggedNotes(bearDb, taggedNoteIds);
+
         return taggedNotes
     } catch (err) {
         console.log('An error occurred:', err);
