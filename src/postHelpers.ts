@@ -1,6 +1,6 @@
 import path from 'path';
-import * as fs from 'fs';
 import dotenv from 'dotenv'
+import { promises as fs } from 'fs';
 import { ZSFNoteRow, Post } from "./interfaces";
 
 dotenv.config()
@@ -13,13 +13,20 @@ export function createBlogContent(notes: ZSFNoteRow[]): Array<Post> {
   
         const filename = createFilename(note.ZTITLE)
 
-        const postContent = `
-+++
-title = ${note.ZTITLE}
-date = ${createDate()}
-draft = false
-+++
-${note.ZTEXT}
+        const content = removeFirstLine(note.ZTEXT)
+        const debearedContent = removeBearTag(content)
+        const cleanContent = cleanString(debearedContent)
+        
+        const tags = extractTags(cleanContent)
+        const detaggedContent = removeTags(cleanContent)
+
+        const postContent = `---
+title: "${note.ZTITLE}"
+date: ${createDate()}
+draft: false
+tags: ${tags}
+---
+${detaggedContent}
         `;
 
         const post: Post = {
@@ -54,13 +61,13 @@ function createFilename(post: string): string {
 
 }
 
-export function createBlogPostFiles(posts: Array<Post>) {
+export async function createBlogPostFiles(posts: Array<Post>) {
 
-    posts.forEach(post => {
+    const promises = posts.map( async (post) => {
 
         const directory = process.env.HUGO_POSTS_PATH || '';
 
-        const fileName = createFilename(post.fileName);
+        const fileName = post.fileName;
 
         const content = post.postContent;
         
@@ -68,16 +75,16 @@ export function createBlogPostFiles(posts: Array<Post>) {
         
         const fullPath = filePath + '.md'
         
-        // Write to the file
-        fs.writeFile(fullPath, content, 'utf8', (err) => {
-            if (err) {
-                console.log('An error occurred:', err);
-            } else {
-                console.log(`Markdown file saved at ${fullPath}`);
-            }
-        });
+        try {
+            await fs.writeFile(fullPath, content, 'utf-8');
+            console.log(`Markdown file saved at ${fullPath}`);;
+        } catch (error) {
+            console.error(`An error occurred: ${error}`);
+        }
         
     });
+
+    await Promise.all(promises)
 
   }
 
@@ -92,4 +99,68 @@ export function createBlogPostFiles(posts: Array<Post>) {
     const offsetHours = '+02:00'; // replace this with your desired time zone offset
     const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetHours}`;
     return formattedDate
+  }
+
+  export function gitTimestamp(): string {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+  }
+
+function removeFirstLine(str: string): string {
+    const lines = str.split('\n');
+    lines.shift();
+    return lines.join('\n');
+}
+
+function removeBearTag(original: string): string {
+    const regex = new RegExp('#bear-blog-tag', 'g');
+    return original.replace(regex, '');
+} 
+
+function cleanString(str: string): string {
+    const trimmedString = str.trim();
+    const cleanedString = trimmedString.replace(/^\s*\n/gm, '');  // Remove empty lines at the start
+    return cleanedString;
+}
+
+function extractTags(sourceString: string): string {
+    const hashtags = extractTagsWithHash(sourceString)
+    return convertTagsToString(hashtags);
+}
+
+function removeTags(sourceString: string): string {
+    const tagsArray = extractTagsWithHash(sourceString);
+    const tagsString = convertTagsToString(tagsArray);
+    const textWithoutTags = removeTagsFromString(tagsArray, sourceString);
+    return textWithoutTags
+    
+}
+
+// Extract tags from the string and include the '#' in the result
+function extractTagsWithHash(input: string): string[] {
+    const regex = /#(\w+)/g;
+    const matches = input.match(regex) || [];
+    return matches;
+}
+  
+// Convert the array of tags to the desired string format, removing the '#' characters
+    function convertTagsToString(tags: string[]): string {
+    const tagsWithoutHash = tags.map(tag => `"${tag.substring(1)}"`);
+    return `[${tagsWithoutHash.join(", ")}]`;
+}
+  
+  // Remove tags from the source string
+  function removeTagsFromString(tags: string[], source: string): string {
+    let updatedSource = source;
+    tags.forEach(tag => {
+      const regex = new RegExp(`\\${tag}\\b`, 'g');
+      updatedSource = updatedSource.replace(regex, '');
+    });
+    return updatedSource;
   }
