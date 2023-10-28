@@ -135,6 +135,31 @@ const fetchTaggedNotes = async (bearDb: Database, z13TagsValues: number[]): Prom
     });
 };
 
+export async function getNoteContent(localDb: Database): Promise<ZSFNoteRow[]> {
+    return new Promise((resolve, reject) => {
+        const sql = `
+            SELECT
+                *
+            FROM
+                ZSFNOTE
+            WHERE
+                POSTED <> 1
+                OR 
+                POSTED IS NULL
+            `;
+
+        localDb.all(sql, (err, rows) => {
+            if (err) {
+                console.log('Error:', err.message);
+                reject(err);
+            } else {
+                resolve(rows as ZSFNoteRow[]);
+            }
+        });
+    });
+};
+
+
 // Main function that executes all steps
 export async function fetchBearData(bearDb: Database) {
     try {
