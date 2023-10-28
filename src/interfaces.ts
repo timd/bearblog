@@ -7,13 +7,18 @@ interface ZSFNoteRow {
     ZARCHIVED: number;
   }
   
-  interface ZSFNoteTagRow {
-    Z_PK: number;
-  }
+interface ZSFNoteTagRow {
+  Z_PK: number;
+}
+
+interface Z_5TAGSRow {
+  Z_5NOTES: number;
+}
+
+interface Post {
+  fileName: string
+  postContent: string
+}
   
-  interface Z_5TAGSRow {
-    Z_5NOTES: number;
-  }
-  
-  export { ZSFNoteRow, ZSFNoteTagRow, Z_5TAGSRow }
+  export { ZSFNoteRow, ZSFNoteTagRow, Z_5TAGSRow, Post }
   

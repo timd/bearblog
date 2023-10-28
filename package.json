@@ -14,7 +14,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^20.8.9",
+    "dotenv": "^16.3.1",
     "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.9"
   }
 }
