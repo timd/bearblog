@@ -216,7 +216,7 @@ const fetchTaggedNotes = async (bearDb: Database, localDb: Database, z13TagsValu
         const placeHolders = z13TagsValues.map(() => '?').join(',');
         const sql = `
         SELECT 
-            Z_PK, ZTITLE, ZTEXT, ZHASIMAGE, ZUNIQUEIDENTIFIER, ZCREATIONDATE, ZMODIFICATIONDATE, ZARCHIVED 
+            Z_PK, ZTITLE, ZTEXT, ZHASIMAGES, ZUNIQUEIDENTIFIER, ZCREATIONDATE, ZMODIFICATIONDATE, ZARCHIVED 
         FROM 
             ZSFNOTE 
         WHERE 

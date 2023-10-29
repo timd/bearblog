@@ -49,12 +49,14 @@ async function triggerFunction() {
   const branch = "main"
   const message = `autocommit from bearblog.app at ${gitTimestamp()}`
 
-  try {
-    await gitAdd(directory);
-    await gitCommit(message, directory);
-    await gitPush(branch, directory);
-  } catch (error) {
-    console.log(`Error handling git push: ${error}`)
+  if (posts.length < 0) {
+    try {
+      await gitAdd(directory);
+      await gitCommit(message, directory);
+      await gitPush(branch, directory);
+    } catch (error) {
+      console.log(`Error handling git push: ${error}`)
+    }
   }
 
   const timestamp = lastUpdateTimestamp();
