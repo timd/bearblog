@@ -66,17 +66,48 @@ export async function saveToLocalDatabase(localDb: Database, rows: ZSFNoteRow[])
                 if (new Date(row.ZMODIFICATIONDATE) > new Date(existingRow.ZMODIFICATIONDATE)) {
                 const updateQuery = `
                     UPDATE ZSFNOTE
-                    SET ZTITLE = ?, ZTEXT = ?, ZUNIQUEIDENTIFIER = ?, ZCREATIONDATE = ?, ZMODIFICATIONDATE = ?, ZARCHIVED = ?, UPDATED = 1
+                    SET ZTITLE = ?, 
+                    ZTEXT = ?, 
+                    ZHASIMAGES = ?,
+                    ZUNIQUEIDENTIFIER = ?, 
+                    ZCREATIONDATE = ?, 
+                    ZMODIFICATIONDATE = ?, 
+                    ZARCHIVED = ?, 
+                    UPDATED = 1
                     WHERE Z_PK = ?;
                 `;
-                await dbRunAsync(localDb, updateQuery, [row.ZTITLE, row.ZTEXT, row.ZUNIQUEIDENTIFIER, row.ZCREATIONDATE, row.ZMODIFICATIONDATE, row.ZARCHIVED, row.Z_PK]);
+                await dbRunAsync(localDb, updateQuery, [
+                    row.ZTITLE, 
+                    row.ZTEXT, 
+                    row.ZHASIMAGES,
+                    row.ZUNIQUEIDENTIFIER, 
+                    row.ZCREATIONDATE, row.
+                    ZMODIFICATIONDATE, 
+                    row.ZARCHIVED, 
+                    row.Z_PK]);
                 }
             } else {
                 const insertQuery = `
-                INSERT INTO ZSFNOTE (Z_PK, ZTITLE, ZTEXT, ZUNIQUEIDENTIFIER, ZCREATIONDATE, ZMODIFICATIONDATE, ZARCHIVED)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO ZSFNOTE (
+                    Z_PK, 
+                    ZTITLE, 
+                    ZTEXT, 
+                    ZHASIMAGES,
+                    ZUNIQUEIDENTIFIER, 
+                    ZCREATIONDATE, 
+                    ZMODIFICATIONDATE, 
+                    ZARCHIVED)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
                 `;
-                await dbRunAsync(localDb, insertQuery, [row.Z_PK, row.ZTITLE, row.ZTEXT, row.ZUNIQUEIDENTIFIER, row.ZCREATIONDATE, row.ZMODIFICATIONDATE, row.ZARCHIVED]);
+                await dbRunAsync(localDb, insertQuery, [
+                    row.Z_PK, 
+                    row.ZTITLE, 
+                    row.ZTEXT, 
+                    row.ZHASIMAGES,
+                    row.ZUNIQUEIDENTIFIER, 
+                    row.ZCREATIONDATE, 
+                    row.ZMODIFICATIONDATE, 
+                    row.ZARCHIVED]);
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -185,7 +216,7 @@ const fetchTaggedNotes = async (bearDb: Database, localDb: Database, z13TagsValu
         const placeHolders = z13TagsValues.map(() => '?').join(',');
         const sql = `
         SELECT 
-            Z_PK, ZTITLE, ZTEXT, ZUNIQUEIDENTIFIER, ZCREATIONDATE, ZMODIFICATIONDATE, ZARCHIVED 
+            Z_PK, ZTITLE, ZTEXT, ZHASIMAGE, ZUNIQUEIDENTIFIER, ZCREATIONDATE, ZMODIFICATIONDATE, ZARCHIVED 
         FROM 
             ZSFNOTE 
         WHERE 
