@@ -10,8 +10,8 @@ export function createBlogContent(notes: ZSFNoteRow[]): Array<Post> {
     const posts = Array<Post>()
   
     notes.forEach(note => {
-  
-        const filename = createFilename(note.ZTITLE)
+
+        const filename = createFilename(note.ZTITLE, note.ZCREATIONDATE)
 
         const content = removeFirstLine(note.ZTEXT)
         const debearedContent = removeBearTag(content)
@@ -43,23 +43,12 @@ ${despacedContent}
   
 }
 
-function createFilename(post: string): string {
-
+function createFilename(post: string, creationDate: string): string {
     const dashedPostName = post.replace(/ /g, "-");
-
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth() + 1;  // Months are zero-based
-    const day = today.getDate();
-
-    const paddedMonth = String(month).padStart(2, '0');
-    const paddedDay = String(day).padStart(2, '0');
-
-    const formattedDate = `${year}-${paddedMonth}-${paddedDay}`;
-
+    const coreDataCreationDate: number = parseFloat(creationDate);
+    const formattedDate = coreDataTimestampToHumanReadable(coreDataCreationDate)
     const filename = `${formattedDate}-${dashedPostName}`
     return filename;
-
 }
 
 export async function createBlogPostFiles(posts: Array<Post>) {
@@ -173,3 +162,25 @@ function despaceContent(input: string): string {
     // Join the array back into a single string, adding an extra new line between each paragraph
     return paragraphs.join('\n\n');
 }
+
+function coreDataTimestampToHumanReadable(coreDataTimestamp: number): string {
+    // CoreData timestamp is in seconds since 2001-01-01
+    // JavaScript Date timestamp is in milliseconds since 1970-01-01
+    // Calculate the number of milliseconds between 1970-01-01 and 2001-01-01
+    const millisecondsBetween1970And2001 = Date.UTC(2001, 0, 1);
+    
+    // Convert CoreData timestamp to milliseconds and add the offset
+    const jsTimestamp = coreDataTimestamp * 1000 + millisecondsBetween1970And2001;
+    
+    // Create a new Date object
+    const date = new Date(jsTimestamp);
+    
+    // Format the date
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    return formattedDate
+  }

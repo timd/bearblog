@@ -3,9 +3,10 @@ import * as fs from 'fs';
 import dotenv from 'dotenv';
 import * as path from 'path';
 import { gitAdd, gitCommit, gitPush } from './gitHelper';
-import { saveToLocalDatabase, fetchBearData } from './dbHelpers';
-import { connectToBearDb, connectToLocalDb, getNoteContent } from './dbHelpers';
 import { createBlogContent, createBlogPostFiles, gitTimestamp } from './postHelpers';
+import { saveToLocalDatabase, fetchBearData, lastUpdateTimestamp, cleanLocalDatabase } from './dbHelpers';
+import { connectToBearDb, connectToLocalDb, getNoteContent, updateLastUpdateTimestamp } from './dbHelpers';
+
 
 dotenv.config();
 
@@ -17,24 +18,31 @@ const localDb = connectToLocalDb();
 const dbPath = process.env.BEAR_DB_PATH || '';
 
 const main = () => {
-  setInterval(() => {
-    checkModified(dbPath);
-  }, 60000);
+  triggerFunction()
+  // setInterval(() => {
+  //   checkModified(dbPath);
+  // }, 60000);
 };
 
 async function triggerFunction() {
 
-  const taggedNotes = await fetchBearData(bearDb);
+  // Get tagged notes from Bear DB
+  const taggedNotes = await fetchBearData(bearDb, localDb);
+  console.log(`${taggedNotes?.length} tagged notes found`)
 
+  // Push tagged notes into local database
   if (taggedNotes) {
     await saveToLocalDatabase(localDb, taggedNotes);
   }
   
+  // Create the content for notes
   const notes = await getNoteContent(localDb);
   
+  // Create post files from note content
   const posts = createBlogContent(notes);
   
   await createBlogPostFiles(posts);
+  console.log(`${posts.length} posts created`)
 
   const directory = process.env.HUGO_REPO_PATH || ''
   const branch = "main"
@@ -43,6 +51,12 @@ async function triggerFunction() {
   // await gitAdd(directory);
   // await gitCommit(message, directory);
   // await gitPush(branch, directory);
+
+  const timestamp = lastUpdateTimestamp();
+  const tsUpdate = await updateLastUpdateTimestamp(localDb, timestamp);
+
+  // Delete notes from local DB so they don't get recreated
+  await cleanLocalDatabase(localDb);
 
 }
 
