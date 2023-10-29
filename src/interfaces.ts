@@ -2,6 +2,7 @@ interface ZSFNoteRow {
     Z_PK: number;
     ZTITLE: string;
     ZTEXT: string;
+    ZHASIMAGES: number;
     ZUNIQUEIDENTIFIER: string;
     ZCREATIONDATE: string;
     ZMODIFICATIONDATE: string;

@@ -108,8 +108,9 @@ function removeFirstLine(str: string): string {
     return lines.join('\n');
 }
 
-function removeBearTag(original: string): string {
-    const regex = new RegExp('#bear-blog-tag', 'g');
+export function removeBearTag(original: string): string {
+    const BEAR_BLOG_TAG = process.env.BEAR_BLOG_TAG || ''
+    const regex = new RegExp(`#${BEAR_BLOG_TAG}\\s`, 'g');
     return original.replace(regex, '');
 } 
 
@@ -119,7 +120,7 @@ function cleanString(str: string): string {
     return cleanedString;
 }
 
-function extractTags(sourceString: string): string {
+export function extractTags(sourceString: string): string {
     const hashtags = extractTagsWithHash(sourceString)
     return convertTagsToString(hashtags);
 }

@@ -44,16 +44,23 @@ async function triggerFunction() {
   await createBlogPostFiles(posts);
   console.log(`${posts.length} posts created`)
 
+  // Push to Git
   const directory = process.env.HUGO_REPO_PATH || ''
   const branch = "main"
   const message = `autocommit from bearblog.app at ${gitTimestamp()}`
 
-  // await gitAdd(directory);
-  // await gitCommit(message, directory);
-  // await gitPush(branch, directory);
+  if (posts.length < 0) {
+    try {
+      await gitAdd(directory);
+      await gitCommit(message, directory);
+      await gitPush(branch, directory);
+    } catch (error) {
+      console.log(`Error handling git push: ${error}`)
+    }
+  }
 
   const timestamp = lastUpdateTimestamp();
-  const tsUpdate = await updateLastUpdateTimestamp(localDb, timestamp);
+  await updateLastUpdateTimestamp(localDb, timestamp);
 
   // Delete notes from local DB so they don't get recreated
   await cleanLocalDatabase(localDb);
