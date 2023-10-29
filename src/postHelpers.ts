@@ -120,7 +120,7 @@ function cleanString(str: string): string {
     return cleanedString;
 }
 
-function extractTags(sourceString: string): string {
+export function extractTags(sourceString: string): string {
     const hashtags = extractTagsWithHash(sourceString)
     return convertTagsToString(hashtags);
 }
