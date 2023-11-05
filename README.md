@@ -20,6 +20,17 @@ Bear.app saves its data to a SQLite database which is accessible when Bear is in
 
 This app grabs any notes in the database that have the `bear-blog-tag`, does some transformation and then saves the content as a Markdown file in the format that the Hugo blog engine expects. Then the changes are pushed to the Git repo that runs my blog, at which point the auto-deployment process kicks in and the new posts are deployed to the live site.
 
+## How to use it
+
+- Do the Bear part.
+- Run the server component: `npm run run-dev`
+
+## How this works with the blog part
+
+This will differ depending on how the blog side is set up, but in this case:
+- the blog is hosted as a [Render](https://render.com) static site
+- the Render side watches the Git repo, and triggers a redeploy whenever there's a push to the `main` branch
+
 ## Can I use it?
 
 Right now, you probably don't want to, because it's very brittle. Give it a little bit more development, though, and then it might be useable as an alpha version. Caveats:
@@ -35,7 +46,7 @@ Ideally, there will be a range of blogging platforms that are supported. But bab
 ## What's next?
 
 - Fixing the annoying false-positive bug when the repo's pushed. It works, but reports an error
-- Checking if repeatedly-creating Markdown files for the same content is an issue (shouldn't be)
+- ~~Checking if repeatedly-creating Markdown files for the same content is an issue (shouldn't be)~~
 - Figuring out how to detect, find, extract and upload images
 - Seeing how much rich Markdown magic will be supportable
 - Put a frontend on the Node part, so it's possible to configure to reflect specific configs on different machines - file locations and so on
