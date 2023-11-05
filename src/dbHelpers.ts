@@ -81,8 +81,8 @@ export async function saveToLocalDatabase(localDb: Database, rows: ZSFNoteRow[])
                     row.ZTEXT, 
                     row.ZHASIMAGES,
                     row.ZUNIQUEIDENTIFIER, 
-                    row.ZCREATIONDATE, row.
-                    ZMODIFICATIONDATE, 
+                    row.ZCREATIONDATE, 
+                    row.ZMODIFICATIONDATE, 
                     row.ZARCHIVED, 
                     row.Z_PK]);
                 }
@@ -97,7 +97,7 @@ export async function saveToLocalDatabase(localDb: Database, rows: ZSFNoteRow[])
                     ZCREATIONDATE, 
                     ZMODIFICATIONDATE, 
                     ZARCHIVED)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 `;
                 await dbRunAsync(localDb, insertQuery, [
                     row.Z_PK, 
